@@ -7,9 +7,11 @@ import { toast } from "react-toastify";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
 } from "firebase/auth";
 import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
-import { auth, db } from "../../firebase.js";
+import { auth, db, provider } from "../../firebase.js";
 import { useNavigate } from "react-router-dom";
 
 function SignUpSignIn() {
@@ -75,12 +77,8 @@ function SignUpSignIn() {
       } catch (error) {
         toast.error("Error creating user document: " + error.message);
       }
-    } else {
-      toast.error("User DOC already exists");
     }
   }
-
-  function signUpWithGoogle() {}
 
   function signInWithEmail() {
     setLoading(true);
@@ -108,7 +106,33 @@ function SignUpSignIn() {
       setLoading(false);
     }
   }
-  function signInWithGoogle() {}
+  function googleAuth() {
+    setLoading(true);
+    try {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          const credential = GoogleAuthProvider.credentialFromResult(result);
+          const token = credential.accessToken;
+          const user = result.user;
+          console.log("User signed in with Google:", user);
+          toast.success("User signed in with Google successfully");
+          createDocumentForUser(user);
+          setLoading(false);
+          navigate("/dashboard");
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          const email = error.customData.email;
+          const credential = GoogleAuthProvider.credentialFromError(error);
+          setLoading(false);
+        });
+    } catch (error) {
+      console.error("Error during Google authentication:", error);
+      toast.error("Google authentication failed");
+      setLoading(false);
+    }
+  }
 
   return (
     <>
@@ -142,7 +166,7 @@ function SignUpSignIn() {
             <Button
               text={loading ? "Loading" : "Sign in using Google"}
               blue={true}
-              onClick={signInWithGoogle}
+              onClick={googleAuth}
             />
             <p className="p-label">
               Or Don't have an account?{" "}
@@ -195,7 +219,7 @@ function SignUpSignIn() {
             <Button
               text={loading ? "Loading" : "Sign Up using Google"}
               blue={true}
-              onClick={signUpWithGoogle}
+              onClick={googleAuth}
             />
             <p className="p-label">
               Or have an account already?{" "}
