@@ -13,3 +13,22 @@
     font-weight: 600;
     margin-bottom: 1rem;
 }
+
+.p-label{
+    text-align: center;
+    font-weight: 400;
+    margin: 0;
+    font-size: 0.8rem;
+}
+
+.click-here{
+    color: var(--primary-color);
+    font-weight: 600;
+    cursor: pointer;
+    opacity: 0.8;
+}
+
+.click-here:hover{
+    opacity: 1;
+    text-decoration: underline;
+}
