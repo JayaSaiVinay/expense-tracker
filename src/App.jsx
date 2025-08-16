@@ -1,19 +1,16 @@
-import { BrowserRouter, Route, Router, Routes } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
-import SignUp from "./pages/SignUp";
-import DashBoard from "./pages/DashBoard";
 import "./App.css";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Dashboard from "./components/Dashboard";
+import SignUpSignIn from "./components/Signup";
+
 function App() {
   return (
-    <>
-      <ToastContainer/>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<SignUp />} />
-          <Route path="/dashboard" element={<DashBoard />} />
-        </Routes>
-      </BrowserRouter>
-    </>
+    <Router>
+      <Routes>
+        <Route path="/" element={<SignUpSignIn />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
+    </Router>
   );
 }
 
