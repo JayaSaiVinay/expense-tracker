@@ -1,12 +1,45 @@
-# React + Vite
+# Expense Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A clean, Vite-powered React application to track your income and expenses with ease. Visualize your financial health with beautiful charts, export your data, and deploy seamlessly to Firebase Hosting.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+##  Live Demo
 
-## Expanding the ESLint configuration
+Check out the deployed app here: [https://expense-tracker-bee55.web.app/](https://expense-tracker-bee55.web.app/)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+##  Features
+
+- **Add & Edit Transactions**: Log your incomes and expenses with names, amounts, dates, and categories. Modify them anytime.
+- **Delete or Reset**: Remove individual transactions or reset your entire history.
+- **Balance Overview**: See your current balance, total income, and total expenses at a glance.
+- **Stunning Visualizations**:
+  - Line chart for balance trends over time.
+  - Pie chart for spending distribution by category.
+- **Search & Sort**: Easily search by name or category, and sort transactions by date or amount.
+- **CSV Export**: Download all your transactions as a CSV file for offline use.
+
+---
+
+##  Tech Stack
+
+| Layer        | Tools & Libraries              |
+|--------------|-------------------------------|
+| Frontend     | React, Vite                    |
+| UI Components| Ant Design, Ant Design Charts |
+| Date Handling| Day.js                        |
+| CSV Export   | PapaParse (`unparse`)         |
+| Notifications| React-Toastify                |
+| Backend      | Firebase (Auth, Firestore)    |
+| Deployment   | Firebase Hosting              |
+
+---
+
+##  Setup & Running Locally
+
+1. **Clone the repo**  
+   ```bash
+   git clone https://github.com/JayaSaiVinay/expense-tracker.git
+   cd expense-tracker
