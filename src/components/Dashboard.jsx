@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Card, Row, Popconfirm, Table, Button, Input, Space } from "antd";
 import { Line, Pie } from "@ant-design/charts";
-import { EditOutlined, DeleteOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
-import { unparse } from "papaparse";
+// --- NEW: Import 'parse' from papaparse ---
+import { unparse, parse } from "papaparse";
 import { onAuthStateChanged } from "firebase/auth";
 import {
   getDocs,
@@ -90,7 +95,10 @@ const Dashboard = () => {
   async function addTransaction(transaction) {
     if (!user) return;
     try {
-      await addDoc(collection(db, `users/${user.uid}/transactions`), transaction);
+      await addDoc(
+        collection(db, `users/${user.uid}/transactions`),
+        transaction
+      );
       toast.success("Transaction Added!");
       fetchTransactions(user.uid);
       handleExpenseCancel();
@@ -176,10 +184,14 @@ const Dashboard = () => {
       }
       if (monthlyMap[monthYear]) {
         monthlyMap[monthYear] +=
-          transaction.type === "income" ? transaction.amount : -transaction.amount;
+          transaction.type === "income"
+            ? transaction.amount
+            : -transaction.amount;
       } else {
         monthlyMap[monthYear] =
-          transaction.type === "income" ? transaction.amount : -transaction.amount;
+          transaction.type === "income"
+            ? transaction.amount
+            : -transaction.amount;
       }
     });
     const sortedMonths = Object.keys(monthlyMap).sort();
@@ -235,6 +247,46 @@ const Dashboard = () => {
     document.body.removeChild(link);
   }
 
+  // --- NEW: Efficient CSV Import Function ---
+  async function importFromCsv(event) {
+    if (!user) return;
+    event.preventDefault();
+    setLoading(true);
+    try {
+      parse(event.target.files[0], {
+        header: true,
+        complete: async function (results) {
+          const batch = writeBatch(db);
+          results.data.forEach((transaction) => {
+            if (
+              transaction.name &&
+              transaction.amount &&
+              transaction.date &&
+              transaction.tag &&
+              transaction.type
+            ) {
+              const newTransactionRef = doc(
+                collection(db, `users/${user.uid}/transactions`)
+              );
+              batch.set(newTransactionRef, {
+                ...transaction,
+                amount: parseFloat(transaction.amount),
+                date: dayjs(transaction.date).format("YYYY-MM-DD"),
+              });
+            }
+          });
+          await batch.commit();
+          toast.success("All Transactions Imported Successfully!");
+          fetchTransactions(user.uid);
+        },
+      });
+      event.target.value = null;
+    } catch (e) {
+      toast.error(e.message);
+      setLoading(false);
+    }
+  }
+
   const cardStyle = {
     boxShadow: "0px 0px 30px 8px rgba(227, 227, 227, 0.75)",
     margin: "2rem",
@@ -243,7 +295,6 @@ const Dashboard = () => {
     flex: 1,
   };
 
-  // ✅ Filter transactions based on search
   const filteredTransactions = transactions.filter(
     (t) =>
       t.name.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -257,14 +308,14 @@ const Dashboard = () => {
       dataIndex: "amount",
       key: "amount",
       render: (text) => `Rs. ${text}`,
-      sorter: (a, b) => a.amount - b.amount,  
+      sorter: (a, b) => a.amount - b.amount,
     },
     { title: "Tag", dataIndex: "tag", key: "tag" },
     {
       title: "Date",
       dataIndex: "date",
       key: "date",
-      sorter: (a, b) => new Date(a.date) - new Date(b.date), 
+      sorter: (a, b) => new Date(a.date) - new Date(b.date),
     },
     {
       title: "Actions",
@@ -333,7 +384,12 @@ const Dashboard = () => {
               <Row gutter={16}>
                 <Card bordered={true} style={cardStyle}>
                   <h2>Financial Statistics</h2>
-                  <Line data={balanceData} xField="month" yField="balance" autoFit />
+                  <Line
+                    data={balanceData}
+                    xField="month"
+                    yField="balance"
+                    autoFit
+                  />
                 </Card>
                 <Card bordered={true} style={{ ...cardStyle, flex: 0.45 }}>
                   <h2>Total Spending</h2>
@@ -350,16 +406,31 @@ const Dashboard = () => {
                 </Card>
               </Row>
               <div className="my-8">
-                <h2 className="text-2xl font-semibold mb-4">My Transactions</h2>
-
-                {/* ✅ Search Input */}
-                <Input
-                  prefix={<SearchOutlined />}
-                  placeholder="Search by name or tag"
-                  value={searchText}
-                  onChange={(e) => setSearchText(e.target.value)}
-                  style={{ maxWidth: 300, marginBottom: "1rem" }}
-                />
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  <h2 className="text-2xl font-semibold">My Transactions</h2>
+                  <div style={{ display: "flex", gap: "1rem" }}>
+                    <Input
+                      prefix={<SearchOutlined />}
+                      placeholder="Search by name or tag"
+                      value={searchText}
+                      onChange={(e) => setSearchText(e.target.value)}
+                      style={{ width: 100, height: 35 }}
+                    />
+                    <Button
+                      style={{ width: 100, height: 35 }}
+                      onClick={exportToCsv}
+                    >
+                      Export to CSV
+                    </Button>
+                  </div>
+                </div>
 
                 <Table
                   dataSource={filteredTransactions}
